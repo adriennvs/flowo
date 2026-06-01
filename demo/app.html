@@ -1803,6 +1803,53 @@ function doLogout(){ window._doLogoutAsync && window._doLogoutAsync(); }
 
 <!-- ── Engine ── -->
 <script>
+// ── Helpers globaux (partagés moteur + UI) ────────────────────────────
+function toDate(v){
+  if(!v) return null;
+  if(v instanceof Date) return new Date(v.getFullYear(),v.getMonth(),v.getDate());
+  const s=String(v).trim().slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(s);
+  const [y,m,d]=s.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+function addDays(d,n){
+  const r=toDate(d);
+  if(!r) return null;
+  r.setDate(r.getDate()+n);
+  return r;
+}
+function sameDay(a,b){
+  const da=toDate(a),db=toDate(b);
+  if(!da||!db) return false;
+  return da.getFullYear()===db.getFullYear()&&da.getMonth()===db.getMonth()&&da.getDate()===db.getDate();
+}
+function parseInput(v){
+  if(v===null||v===undefined||v==='') return 0;
+  return parseFloat(String(v).replace(/\s/g,'').replace(/[^\d,.-]/g,'').replace(',','.')) || 0;
+}
+// ──────────────────────────────────────────────────────────────────────
+
+
+
+// ── Helpers format (utilisés par le moteur ET l'UI) ──
+function fmt(d){
+  if(!d) return '';
+  const dt = (d instanceof Date) ? d : new Date(String(d).trim().slice(0,10));
+  if(isNaN(dt)) return String(d).slice(0,10);
+  return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function fmtEur(n){
+  if(n===null||n===undefined) return '—';
+  return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+}
+function fmtShort(n){
+  if(n===null||n===undefined) return '—';
+  const abs = Math.abs(n);
+  if(abs>=1000000) return (n/1000000).toFixed(1).replace('.',',')+'M€';
+  if(abs>=1000) return Math.round(n/1000)+'k€';
+  return Math.round(n)+'€';
+}
+
 // ─────────────────────── MOTEUR INJECTÉ ────────────────────────────────────
 // (copie de engine.js inliné pour fonctionner sans serveur)
 'use strict';
@@ -1835,6 +1882,8 @@ function recalculate(){
   _recalcTimer = setTimeout(_computeAsync, 600);
   return r;
 }
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 
 async function _computeAsync(){
   // Annuler la requête précédente si encore en vol
@@ -2117,6 +2166,21 @@ const alertes=[];
 // fin _computeLocal
 
 
+function syncSalariesToParams(){
+  const actifs=state.salaries.filter(s=>s.actif);
+  const totalBrut=actifs.reduce((s,sal)=>s+sal.brut,0);
+  const totalCharges=actifs.filter(s=>s.contrat!=='ALT').reduce((s,sal)=>s+Math.round(sal.brut*.42),0);
+  // paieNets = ce qui sort réellement du compte = brut net salarié ≈ brut × 0.78
+  const totalNet=Math.round(totalBrut*0.78);
+  state.params.paieNets=totalNet;
+  state.params.urssaf=Math.round(totalCharges);
+  // Sync vers chargesRecurrentes
+  const paieRec=state.chargesRecurrentes.find(ch=>ch.id==='paie');
+  const urssafRec=state.chargesRecurrentes.find(ch=>ch.id==='urssaf');
+  if(paieRec) paieRec.montant=totalNet;
+  if(urssafRec) urssafRec.montant=Math.round(totalCharges);
+}
+
 const mutations={
   setParam(k,v){state.params[k]=v;recalculate()},
   setScenario(s){state.params.scenario=s;recalculate()},
@@ -2180,20 +2244,7 @@ const mutations={
   },
 };
 
-function syncSalariesToParams(){
-  const actifs=state.salaries.filter(s=>s.actif);
-  const totalBrut=actifs.reduce((s,sal)=>s+sal.brut,0);
-  const totalCharges=actifs.filter(s=>s.contrat!=='ALT').reduce((s,sal)=>s+Math.round(sal.brut*.42),0);
-  // paieNets = ce qui sort réellement du compte = brut net salarié ≈ brut × 0.78
-  const totalNet=Math.round(totalBrut*0.78);
-  state.params.paieNets=totalNet;
-  state.params.urssaf=Math.round(totalCharges);
-  // Sync vers chargesRecurrentes
-  const paieRec=state.chargesRecurrentes.find(ch=>ch.id==='paie');
-  const urssafRec=state.chargesRecurrentes.find(ch=>ch.id==='urssaf');
-  if(paieRec) paieRec.montant=totalNet;
-  if(urssafRec) urssafRec.montant=Math.round(totalCharges);
-}
+
 
 function parseCSVPennylane(csv){
   const lines=csv.trim().split('\n');if(lines.length<2)return[];
@@ -2238,7 +2289,7 @@ function nav(id){
 }
 
 // ── Toast ──
-function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
 
 // ── Setters rapides ──
 function setP(k,v){mutations.setParam(k,v);mutations.save()}

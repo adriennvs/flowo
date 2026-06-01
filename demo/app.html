@@ -1821,6 +1821,9 @@ function _compute(){
   return _lastResult;
 }
 
+// Système de subscriptions
+let _subs = [];
+
 // Debounce 600ms pour éviter de spammer l'API à chaque frappe
 let _recalcTimer   = null;
 let _currentAbort  = null;
@@ -2201,6 +2204,8 @@ function parseCSVPennylane(csv){
   const pd=s=>{if(!s)return'';s=String(s).trim().replace(/^"|"$/g,'');if(/^\d{2}\/\d{2}\/\d{4}$/.test(s))return`${s.slice(6)}-${s.slice(3,5)}-${s.slice(0,2)}`;if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);return s};
   return lines.slice(1).filter(l=>l.trim()).map(line=>{const c=line.split(sep).map(x=>x.trim().replace(/^"|"$/g,''));const g=i=>i>=0?(c[i]??''):'';const ht=pn(g(fi.ht)),tva=pn(g(fi.tva)),ttc=pn(g(fi.ttc))||ht+tva;return{num:g(fi.num)||`IMP-${Date.now()}`,client:g(fi.client)||'Client inconnu',objet:g(fi.objet)||'',ht,tva,ttc,emission:pd(g(fi.emission)),echeance:pd(g(fi.echeance)),statut:g(fi.statut)||'En attente'}}).filter(f=>f.client&&f.ttc>0);
 }
+function subscribe(fn) { _subs.push(fn); }
+
 window.Engine={state,recalculate,subscribe,mutations,parseCSVPennylane,fmt,fmtEur};
 
 // ─────────────────────── UI ─────────────────────────────────────────────────

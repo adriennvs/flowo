@@ -1386,6 +1386,7 @@ function doLogout(){ window._doLogoutAsync && window._doLogoutAsync(); }
   <div class="card" id="ff-summary-card">
     <div class="ch"><div class="ct">📊 Factures fournisseurs chargées</div><span class="b br" id="ff-total">—</span></div>
     <div id="ff-summary"></div>
+    <div id="fourn-list"></div>
   </div>
 
   <!-- Charges récurrentes + Charges variables -->
@@ -2934,7 +2935,7 @@ function renderChargesPage(r){
   // ── Charges récurrentes ──
   const recEl=document.getElementById('charges-rec-list');
   if(recEl){
-    H(recEl, (state.chargesRecurrentes||[]).map((ch,realIdx)=>{if(ch.id==='paie'||ch.id==='urssaf')return '';const i=realIdx;
+    H(recEl, (state.chargesRecurrentes||[]).map((ch,realIdx)=>{const i=realIdx;
       const isAuto=ch.auto;
       return `<div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr auto;gap:6px;padding:7px 18px;border-bottom:1px solid var(--bdr);align-items:center">
         <div>
@@ -6424,9 +6425,12 @@ async function _doLoginAsync(){
     // 3. Appliquer le branding
     _applyTenantBranding(tenant);
 
-    // 4. Charger le state si existant
-    if(tenant.state_json) {
+    // 4. Charger le state si existant (garder démo si tenant vide)
+    if(tenant.state_json && Object.keys(tenant.state_json).length > 0) {
       _loadStateFromObject(tenant.state_json);
+    } else {
+      // Pas de données sauvegardées → utiliser les données démo déjà dans le state
+      syncSalariesToParams();
     }
 
     // 5. Masquer le login et démarrer

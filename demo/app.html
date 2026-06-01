@@ -2214,7 +2214,7 @@ const sols=flux.map(r=>r.solde),sMin=Math.min(...sols),sMax=Math.max(...sols),iM
     isTotal,isAcompte:isAcomp,tvaNette,retainersTotalTTC:retTTC,
     pipeTotalPondere:pipeTotal,chargesFixesMois:cfm,scenario:sc,
     signalGlobal:sMin<p.seuilCritique?'critique':sMin<p.seuilVigilance?'vigilance':'sain',
-    signalJ30:flux[29]?.signal??'🟢'};
+    signalJ30:flux[29]?.signal??'🟢',runway:runwayJours};
 const alertes=[];
   const fRet=state.facturesClients.filter(f=>f.statut==='En retard');
   if(fRet.length)alertes.push({niveau:'rouge',titre:`${fRet.length} facture(s) en retard`,desc:fRet.map(f=>`${f.client} — ${f.num}`).join(', '),action:'Envoyer relance immédiate',valeur:fRet.reduce((s,f)=>s+f.ttc,0)});
@@ -2242,18 +2242,44 @@ const alertes=[];
 
 
 function syncSalariesToParams(){
-  const actifs=state.salaries.filter(s=>s.actif);
-  const totalBrut=actifs.reduce((s,sal)=>s+sal.brut,0);
-  const totalCharges=actifs.filter(s=>s.contrat!=='ALT').reduce((s,sal)=>s+Math.round(sal.brut*.42),0);
-  // paieNets = ce qui sort réellement du compte = brut net salarié ≈ brut × 0.78
-  const totalNet=Math.round(totalBrut*0.78);
-  state.params.paieNets=totalNet;
-  state.params.urssaf=Math.round(totalCharges);
-  // Sync vers chargesRecurrentes
-  const paieRec=state.chargesRecurrentes.find(ch=>ch.id==='paie');
-  const urssafRec=state.chargesRecurrentes.find(ch=>ch.id==='urssaf');
-  if(paieRec) paieRec.montant=totalNet;
-  if(urssafRec) urssafRec.montant=Math.round(totalCharges);
+  const actifs = state.salaries.filter(s=>s.actif);
+  const totalBrut = actifs.reduce((s,sal)=>s+sal.brut, 0);
+  const totalCharges = actifs.filter(s=>s.contrat!=='ALT').reduce((s,sal)=>s+Math.round(sal.brut*.42), 0);
+  const totalNet = Math.round(totalBrut * 0.78);
+
+  // Mettre à jour params
+  state.params.paieNets = totalNet;
+  state.params.urssaf = Math.round(totalCharges);
+
+  // Sync vers chargesRecurrentes — créer les entrées si absentes
+  if(!state.chargesRecurrentes) state.chargesRecurrentes = [];
+
+  let paieRec = state.chargesRecurrentes.find(ch=>ch.id==='paie');
+  if(!paieRec) {
+    paieRec = {id:'paie', label:'Paie nette', montant:totalNet, jourPaie:state.params.jourPaie||25, actif:true, auto:true};
+    state.chargesRecurrentes.push(paieRec);
+  } else {
+    paieRec.montant = totalNet;
+    paieRec.jourPaie = state.params.jourPaie || 25;
+  }
+
+  let urssafRec = state.chargesRecurrentes.find(ch=>ch.id==='urssaf');
+  if(!urssafRec) {
+    urssafRec = {id:'urssaf', label:'Charges patronales', montant:Math.round(totalCharges), jourPaie:state.params.jourUrssaf||26, actif:true, auto:true};
+    state.chargesRecurrentes.push(urssafRec);
+  } else {
+    urssafRec.montant = Math.round(totalCharges);
+    urssafRec.jourPaie = state.params.jourUrssaf || 26;
+  }
+
+  // Loyer — s'assurer qu'il est dans chargesRecurrentes
+  let loyerRec = state.chargesRecurrentes.find(ch=>ch.id==='loyer');
+  if(!loyerRec && state.params.loyer > 0) {
+    state.chargesRecurrentes.push({id:'loyer', label:'Loyer', montant:state.params.loyer, jourPaie:state.params.jourLoyer||1, actif:true});
+  } else if(loyerRec) {
+    loyerRec.montant = state.params.loyer || loyerRec.montant;
+    loyerRec.jourPaie = state.params.jourLoyer || 1;
+  }
 }
 
 const mutations={

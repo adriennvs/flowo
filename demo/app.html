@@ -5510,11 +5510,17 @@ async function groqChat(messages, maxTokens = 1000, temperature = 0.7) {
 
     // Fallback : clé locale
     const groqKey = localStorage.getItem('an_groq_key') || '';
-    if(!groqKey) throw new Error('Clé Groq non configurée. Ajoutez-la dans Paramètres.');
+    if(!groqKey) {
+      // Afficher un modal de saisie de clé rapide
+      const key = window.prompt('Entrez votre clé Groq API (gsk_...) :\n\nObtenez-la sur console.groq.com → API Keys (gratuit)');
+      if(!key || !key.startsWith('gsk_')) throw new Error('Clé Groq annulée ou invalide.');
+      localStorage.setItem('an_groq_key', key.trim());
+    }
+    const groqKeyFinal = localStorage.getItem('an_groq_key') || '';
 
     const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKeyFinal },
       body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages, max_tokens: maxTokens, temperature }),
       signal: abortCtrl.signal,
     });
@@ -6278,21 +6284,7 @@ Missions en cours de signature : ${fmtEur(k.pipeTotalPondere)}
 Alertes : ${alr}`;
 
   try {
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        temperature: 0.3,
-        max_tokens: 600,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    if(!resp.ok){ const e = await resp.json().catch(()=>({})); throw new Error('HTTP '+resp.status+' — '+(e.error?.message||resp.statusText)); }
-
-    const data = await resp.json();
-    const raw = data.choices?.[0]?.message?.content || '';
+    const raw = await groqChat([{ role: 'user', content: prompt }], 600, 0.3);
     let ia;
     try {
       ia = JSON.parse(raw.replace(/```json|```/gi,'').trim());

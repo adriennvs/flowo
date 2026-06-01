@@ -3523,20 +3523,23 @@ let stressChart = null;
 let stCurrentMutations = [];  // mutations JSON calculées par l'IA, à appliquer
 let stHistory = [];           // historique des simulations
 
-// Charger la clé Groq depuis localStorage
+// Initialiser le Stress Test
 function stInit(){
   const savedKey = localStorage.getItem('an_groq_key') || '';
   const keyEl = document.getElementById('st-groq-key');
   if(keyEl && savedKey) keyEl.value = savedKey;
-  // Mettre à jour le badge de statut
+  // Badge statut — connecté via proxy Supabase si session active, ou clé locale
   const badge = document.getElementById('st-groq-status');
   if(badge){
-    if(savedKey && savedKey.startsWith('gsk_')){
-      badge.textContent = '✓ Groq connecté';
+    if(_flowoSession){
+      badge.textContent = '✓ Groq connecté (proxy)';
+      badge.className = 'b bg';
+    } else if(savedKey && savedKey.startsWith('gsk_')){
+      badge.textContent = '✓ Groq connecté (clé locale)';
       badge.className = 'b bg';
     } else {
-      badge.textContent = 'Clé Groq requise';
-      badge.className = 'b ba';
+      badge.textContent = '⚡ IA prête (proxy serveur)';
+      badge.className = 'b bt';
     }
   }
   // Charger historique
@@ -3957,13 +3960,6 @@ async function runStressTest(){
   const query = (document.getElementById('st-query')?.value || '').trim();
   if(!query){ toast('Décrivez d\'abord un scénario'); return; }
 
-  const groqKey = localStorage.getItem('an_groq_key') || '';
-  if(!groqKey || !groqKey.startsWith('gsk_')){
-    toast('Ajoutez votre clé Groq API ci-dessus');
-    document.getElementById('st-groq-key')?.focus();
-    return;
-  }
-
   // Afficher spinner
   const statusBar = document.getElementById('st-status-bar');
   const statusTxt = document.getElementById('st-status-txt');
@@ -3976,30 +3972,11 @@ async function runStressTest(){
   try {
     const { system, user } = stBuildPrompt(query);
 
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + groqKey
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        temperature: 0.1,
-        max_tokens: 1500,
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user }
-        ]
-      })
-    });
-
-    if(!resp.ok){
-      const err = await resp.json();
-      throw new Error(err.error?.message || 'Erreur API Groq ' + resp.status);
-    }
-
-    const data = await resp.json();
-    const rawText = data.choices?.[0]?.message?.content || '';
+    // Utiliser groqChat() qui passe par le proxy Supabase (clé sécurisée)
+    const rawText = await groqChat([
+      { role: 'system', content: system },
+      { role: 'user', content: user }
+    ], 1500, 0.1);
 
     // Parser le JSON
     let iaData;
@@ -5392,7 +5369,7 @@ async function analyzeEcart() {
 
   const groqKey = localStorage.getItem('an_groq_key') || '';
   if(!groqKey) {
-    if(iaResult) iaResult.textContent = "Clé Groq requise pour l'analyse IA. Configurez-la dans les Paramètres.";
+    if(iaResult) iaResult.textContent = 'Analyse IA indisponible.';
     return;
   }
 
@@ -6242,9 +6219,6 @@ async function generateNarration(){
     return;
   }
 
-  const groqKey = localStorage.getItem('an_groq_key') || '';
-  if(!groqKey || !groqKey.startsWith('gsk_')){ toast('⚠ Clé Groq manquante'); return; }
-
   // Créer ou récupérer la box
   var box = document.getElementById('narr-box');
   if(!box){
@@ -6609,10 +6583,77 @@ function startAutosave() {
   const k = localStorage.getItem('an_groq_key') || '';
   if(!k) { localStorage.setItem('an_groq_key',''); }
 })();
-// Démarrer avec données de démo (affichées derrière le login)
-syncSalariesToParams();
-recalculate();
-$('h-date').textContent=fmt(state.params.dateReleve);
+// Init : vérifier session existante avant de rendre quoi que ce soit
+(async function initApp(){
+  // Afficher un spinner de chargement sur l'app principale
+  const appEl = document.querySelector('.app-wrap') || document.body;
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'app-loading';
+  loadingDiv.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:8888;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px';
+  loadingDiv.innerHTML = '<div style="font-size:28px">⚡</div><div style="font-size:13px;color:var(--t2);font-family:var(--mono)">Chargement…</div>';
+  document.body.appendChild(loadingDiv);
+
+  try {
+    // Vérifier si une session existe en localStorage
+    const ref = 'pjtgfwxpcbvcvzlqsbbk';
+    const sessionRaw = localStorage.getItem('sb-' + ref + '-auth-token');
+    
+    if(sessionRaw) {
+      const session = JSON.parse(sessionRaw);
+      const notExpired = session.expires_at && session.expires_at > Date.now()/1000;
+      
+      if(notExpired && session.access_token) {
+        // Session valide → restaurer silencieusement
+        _flowoSession = session;
+        
+        // Charger les données depuis Supabase
+        try {
+          const tenantResp = await fetch(FLOWO_TENANT_API, {
+            headers: {'Authorization': 'Bearer ' + session.access_token}
+          });
+          const tenant = await tenantResp.json();
+          _applyTenantBranding(tenant);
+          
+          const hasRealData = tenant.state_json && (
+            (tenant.state_json.salaries && tenant.state_json.salaries.length > 0) ||
+            (tenant.state_json.retainers && tenant.state_json.retainers.length > 0) ||
+            (tenant.state_json.facturesClients && tenant.state_json.facturesClients.length > 0)
+          );
+          if(hasRealData) _loadStateFromObject(tenant.state_json);
+          else syncSalariesToParams();
+          
+          // Cacher le login, afficher l'app
+          const loginScr = document.getElementById('login-screen');
+          if(loginScr) loginScr.style.display = 'none';
+          startAutosave();
+          wizCheckFirstLaunch();
+        } catch(e) {
+          // Supabase KO → fallback offline
+          const loaded = loadOfflineFallback();
+          if(!loaded) syncSalariesToParams();
+          const loginScr = document.getElementById('login-screen');
+          if(loginScr) loginScr.style.display = 'none';
+        }
+      } else {
+        // Session expirée → afficher login
+        syncSalariesToParams();
+      }
+    } else {
+      // Pas de session → afficher login avec données démo derrière
+      syncSalariesToParams();
+    }
+  } catch(e) {
+    console.warn('Init error:', e);
+    syncSalariesToParams();
+  }
+
+  // Dans tous les cas : calculer et rendre
+  recalculate();
+  $('h-date').textContent = fmt(state.params.dateReleve);
+  
+  // Cacher le spinner
+  loadingDiv.remove();
+})();
 </script>
 </body>
 </html>

@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230D1630'/><text x='16' y='23' text-anchor='middle' font-size='20' font-family='Arial' font-weight='bold' fill='%232563EB'>F</text></svg>">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D1630">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co https://api.groq.com https://fonts.googleapis.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Flowo — Trésorerie</title>
 <!-- v24 : moteur _compute migré vers Supabase Edge Function (Flowo API) -->
 <script>
@@ -536,29 +539,119 @@ select{width:auto;text-align:left;cursor:pointer}
 .st-history-meta{font-size:10px;color:var(--t3);font-family:var(--mono)}
 
 /* ── RESPONSIVE MOBILE FLOWO v26 ── */
+/* ══ RESPONSIVE MOBILE ══════════════════════════════════════════ */
 @media(max-width:768px){
+  /* Layout */
   .app{flex-direction:column!important}
-  .sidebar{width:100%!important;height:auto!important;flex-direction:row!important;overflow-x:auto!important;padding:6px 8px!important;border-right:none!important;border-bottom:1px solid var(--bdr)!important;gap:2px!important}
-  .sn{flex-direction:column!important;min-width:52px!important;padding:5px 8px!important;gap:1px!important;border-radius:8px!important;text-align:center!important}
-  .sn .si{font-size:17px}
-  .sn span:not(.si){font-size:7.5px!important;line-height:1.2}
+  main{padding:12px!important;gap:12px!important}
+
+  /* Header */
+  .hdr{padding:8px 12px!important;gap:8px!important}
+  .hdr-brand{font-size:14px!important}
+  .hdr-right{gap:4px!important}
+  .hdr-right .btn{font-size:9px!important;padding:4px 7px!important}
+  .hdr-right .btn:not(.btn-primary):not(#btn-save):not(#btn-notif){display:none!important}
+
+  /* Sidebar → barre du bas */
+  .sidebar{
+    position:fixed!important;bottom:0!important;left:0!important;right:0!important;
+    width:100%!important;height:56px!important;z-index:200!important;
+    flex-direction:row!important;overflow-x:auto!important;
+    padding:4px 6px!important;border-right:none!important;
+    border-top:1px solid var(--bdr)!important;border-bottom:none!important;
+    gap:2px!important;align-items:center!important;
+    background:var(--navy)!important;
+  }
+  .sidebar .sb-solde{display:none!important}
+  .sn{
+    flex-direction:column!important;min-width:48px!important;
+    padding:4px 6px!important;gap:1px!important;
+    border-radius:8px!important;text-align:center!important;flex-shrink:0!important;
+  }
+  .sn .si{font-size:16px!important}
+  .sn span:not(.si){font-size:7px!important;line-height:1.2!important;color:rgba(255,255,255,.6)!important}
+  .sn.active span:not(.si){color:#fff!important}
   .sn.section-label{display:none!important}
-  .hdr{padding:8px 12px!important}
-  .hdr-brand{font-size:15px!important}
-  .hdr-right .btn{font-size:9px!important;padding:4px 8px!important}
+
+  /* Contenu — padding bottom pour la barre nav */
+  main{padding-bottom:72px!important}
+
+  /* Grilles */
   .g2,.g3,.g4{grid-template-columns:1fr!important;gap:10px!important}
-  .card{padding:12px 14px!important}
-  #tresoChart{height:180px!important}
-  .kpi-strip,div[style*="grid-template-columns:repeat(6"]{grid-template-columns:repeat(3,1fr)!important}
-  .prof-box{margin:10px!important;padding:24px 20px!important}
+
+  /* Cards */
+  .card{padding:12px!important}
+
+  /* Strip KPI → 2 colonnes */
+  .strip{grid-template-columns:repeat(2,1fr)!important}
+  .ksi{padding:10px!important}
+  .ksi-v{font-size:15px!important}
+
+  /* Chart */
+  #tresoChart{height:160px!important}
+
+  /* Tableaux → scroll horizontal */
+  .edit-table,.fc-table,.ff-table,.sal-table{
+    display:block!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;
+  }
+  .edit-hdrs,.edit-row{min-width:480px!important}
+
+  /* Bar rows (factures home) */
+  .bar-row{grid-template-columns:1fr auto!important;gap:6px!important}
+  .bar-wrap{display:none!important}
+
+  /* Modales */
+  .relance-box,.prof-box,.wiz-box{
+    margin:8px!important;width:calc(100% - 16px)!important;
+    max-height:calc(100vh - 80px)!important;
+  }
+  .prof-box{padding:20px 16px!important}
   .prof-options{grid-template-columns:1fr!important}
-  .relance-box{margin:10px!important}
-  .wiz-box{margin:8px!important}
+
+  /* Scénarios */
+  .sc-cards{grid-template-columns:1fr!important}
+
+  /* Daily Flow */
+  .flux-row{padding:10px 12px!important;gap:8px!important}
+  .flux-labels{font-size:11px!important}
+  .flux-amt{font-size:12px!important;min-width:50px!important}
+
+  /* Boutons header action */
+  .btn-rapide,.btn-config,.btn-synchro{display:none!important}
 }
+
 @media(max-width:480px){
-  .kpi-strip,div[style*="grid-template-columns:repeat(6"]{grid-template-columns:repeat(2,1fr)!important}
+  /* Strip 2 colonnes serré */
+  .strip{grid-template-columns:repeat(2,1fr)!important}
+  .ksi:nth-child(n+5):not(#ksi-paie){display:none!important}
+
+  /* Sidebar encore plus compacte */
+  .sn{min-width:40px!important;padding:3px 4px!important}
   .sn span:not(.si){display:none!important}
-  .sn{min-width:40px!important}
+
+  /* Header minimaliste */
+  .hdr-right .btn{padding:3px 6px!important;font-size:8px!important}
+
+  /* Titres de page */
+  .pg-title{font-size:18px!important}
+
+  /* Formulaires */
+  .edit-input{font-size:13px!important}
+
+  /* Toast plus petit */
+  .toast-msg{font-size:11px!important;padding:8px 12px!important}
+}
+
+/* Touch — zones cliquables plus grandes sur mobile */
+@media(hover:none) and (pointer:coarse){
+  .sn{min-height:44px!important}
+  .btn{min-height:36px!important;min-width:36px!important}
+  .edit-input{min-height:40px!important;font-size:16px!important} /* évite zoom iOS */
+  input[type="text"],input[type="email"],input[type="password"],input[type="number"]{
+    font-size:16px!important; /* évite zoom iOS sur focus */
+  }
+  .bar-row{padding:12px 14px!important}
+  .flux-row{padding:12px!important}
 }
 </style>
 <script>
@@ -2379,6 +2472,8 @@ function fmtD(d){if(!d)return'—';return toDate(d).toLocaleDateString('fr-FR',{
 function tip(text){ return '<span class="tip">?<span class="tip-box">'+text+'</span></span>'; }
 // ── Nav ──
 function nav(id){
+  // Scroll to top sur mobile à chaque changement de page
+  try { document.querySelector('main')?.scrollTo({top:0,behavior:'instant'}); } catch(e){}
   const pages=['home','alertes','factures','flux','prevreal','pipe','stresstest','guide','masse','settings','ca','charges','fiscalite'];
   pages.forEach(p=>{const el=document.getElementById('p-'+p);if(el)el.style.display=p===id?'':'none'});
   document.querySelectorAll('.hn,.sn').forEach(el=>{

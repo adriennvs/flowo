@@ -1855,7 +1855,59 @@ function fmtShort(n){
 'use strict';
 // Stub global doLogin — sera remplacé par la vraie fonction async
 function doLogin(){ window._doLoginAsync && window._doLoginAsync(); }
-const state={params:{solde:48350,dateReleve:'2025-04-06',horizon:90,loyer:3500,jourLoyer:1,paieNets:37050,jourPaie:25,urssaf:19572,jourUrssaf:26,saas:650,jourSaas:15,emprunt:0,jourEmprunt:10,regimeTVA:'Encaissements',freqTVA:'mensuelle',tauxTVA:.20,jourTVA:20,freqURSSAF:'mensuelle',resultatPrev:85000,tauxIS:.25,isAcomptes:[{date:'2025-06-15'},{date:'2025-09-15'}],seuilCritique:15000,seuilVigilance:30000,seuilConfort:50000,scenario:'Base',scenarios:{Conservative:{coefRetard:1.20,coefPipe:.70,coefCharges:1.10},Base:{coefRetard:1,coefPipe:1,coefCharges:1},Optimistic:{coefRetard:.80,coefPipe:1.20,coefCharges:.95}},residuelVersements:3,residuelJours:[5,15,25],chargesVarVersements:3,chargesVarJours:[8,18,28],nomAgence:'Flowo Démo'},facturesClients:[ {num:'FA-2025-043',client:'Techvision SAS',objet:'Campagne social ads',ht:4200,tva:840,ttc:5040,emission:'2025-03-15',echeance:'2025-04-14',statut:'En attente'}, {num:'FA-2025-044',client:'Groupe Lumière',objet:'Production vidéo Q1',ht:12000,tva:2400,ttc:14400,emission:'2025-03-20',echeance:'2025-04-19',statut:'En attente'}, {num:'FA-2025-045',client:'Optima Conseil',objet:'Audit UX',ht:3500,tva:700,ttc:4200,emission:'2025-03-28',echeance:'2025-04-27',statut:'En retard'},],facturesFournisseurs:[ {num:'ACH-001',fourn:'Thomas Renard',cat:'Dev web',ht:4500,tva:0,ttc:4500,echeance:'2025-04-09',statut:'À payer'}, {num:'ACH-002',fourn:'SCI Haussmann',cat:'Loyer',ht:3500,tva:0,ttc:3500,echeance:'2025-05-01',statut:'À payer'},],chargesRecurrentes:[ {id:'loyer',label:'Loyer',montant:3500,jourPaie:1,actif:true}, {id:'urssaf',label:'URSSAF',montant:19572,jourPaie:26,actif:true}, {id:'saas',label:'Abonnements SaaS',montant:650,jourPaie:15,actif:true},],scoring:[ {client:'Techvision SAS',retardMoyen:8,risque:.03}, {client:'Groupe Lumière',retardMoyen:5,risque:.02}, {client:'Optima Conseil',retardMoyen:22,risque:.12},],retainers:[ {client:'Groupe Lumière',htMensuel:8500,jourEncaissement:5,actif:true}, {client:'Techvision SAS',htMensuel:2000,jourEncaissement:10,actif:true}, {client:'Maison Borel',htMensuel:1500,jourEncaissement:22,actif:true},],pipe:[ {client:'NovaCorp',mission:'Brand identity',ht:15000,proba:.90,acompte:.30,dateFact:'2025-05-15'}, {client:'Groupe Lumière',mission:'Campagne été 2025',ht:22000,proba:.80,acompte:.40,dateFact:'2025-06-01'},],caMensuel:[ {mois:'2025-04',label:'Avril 2025',caPrevuHT:35000,inclure:true}, {mois:'2025-05',label:'Mai 2025',caPrevuHT:42000,inclure:true},],evenementsVariables:[ {mois:'2025-06',poste:'Directrice Conseil',type:'Prime objectifs',brutHT:3000,statut:'Prévu'},],salaries:[ {poste:'Directrice Conseil',brut:5800,contrat:'CDI',jourPaie:25,actif:true}, {poste:'Dev Web Front-end',brut:4200,contrat:'CDI',jourPaie:25,actif:true}, {poste:'Chef de projet',brut:4500,contrat:'CDI',jourPaie:25,actif:true},],chargesVariables:[ {label:'Sous-traitance avril',montantHT:5000,mois:'2025-04',actif:true},],};
+const state={params:{solde:48350,dateReleve:'2025-04-06',horizon:90,loyer:3500,jourLoyer:1,paieNets:37050,jourPaie:25,urssaf:19572,jourUrssaf:26,saas:650,jourSaas:15,emprunt:0,jourEmprunt:10,regimeTVA:'Encaissements',freqTVA:'mensuelle',tauxTVA:.20,jourTVA:20,freqURSSAF:'mensuelle',resultatPrev:85000,tauxIS:.25,isAcomptes:[{date:'2025-06-15'},{date:'2025-09-15'},{date:'2025-12-15'},{date:'2026-03-15'}],seuilCritique:15000,seuilVigilance:30000,seuilConfort:50000,scenario:'Base',scenarios:{Conservative:{coefRetard:1.20,coefPipe:.70,coefCharges:1.10},Base:{coefRetard:1,coefPipe:1,coefCharges:1},Optimistic:{coefRetard:.80,coefPipe:1.20,coefCharges:.95}},residuelVersements:3,residuelJours:[5,15,25],chargesVarVersements:3,chargesVarJours:[8,18,28],nomAgence:'Agence Nova SAS'},
+salaries:[
+  {poste:'Directrice Conseil',      contrat:'CDI',brut:5800,jourPaie:25,actif:true},
+  {poste:'Dev Web Front-end',       contrat:'CDI',brut:4600,jourPaie:25,actif:true},
+  {poste:'Office Manager',          contrat:'CDI',brut:3100,jourPaie:25,actif:true},
+  {poste:'Responsable Commercial',  contrat:'CDI',brut:4500,jourPaie:25,actif:true},
+  {poste:'Alternant Marketing',     contrat:'ALT',brut:900, jourPaie:25,actif:true},
+],
+facturesClients:[
+  {num:'FA-2025-043',client:'Techvision SAS', objet:'Campagne social ads',   ht:4200, tva:840, ttc:5040, emission:'2025-03-15',echeance:'2025-04-14',statut:'En attente'},
+  {num:'FA-2025-044',client:'Groupe Lumière', objet:'Production vidéo Q1',   ht:12000,tva:2400,ttc:14400,emission:'2025-03-20',echeance:'2025-04-19',statut:'En attente'},
+  {num:'FA-2025-045',client:'Optima Conseil', objet:'Audit UX',              ht:3500, tva:700, ttc:4200, emission:'2025-03-28',echeance:'2025-04-27',statut:'En retard'},
+  {num:'FA-2025-046',client:'Maison Borel',   objet:'Stratégie digitale Q2', ht:6000, tva:1200,ttc:7200, emission:'2025-04-01',echeance:'2025-05-01',statut:'En attente'},
+],
+facturesFournisseurs:[
+  {num:'ACH-001',fourn:'Thomas Renard (dev)',cat:'Dev web',   ht:4500,tva:0,  ttc:4500,echeance:'2025-04-09',statut:'À payer'},
+  {num:'ACH-002',fourn:'SCI Haussmann',     cat:'Loyer',     ht:3500,tva:0,  ttc:3500,echeance:'2025-05-01',statut:'À payer'},
+  {num:'ACH-003',fourn:'Adobe Creative',    cat:'Logiciels', ht:542, tva:108,ttc:650, echeance:'2025-04-15',statut:'À payer'},
+],
+chargesRecurrentes:[
+  {id:'loyer',  label:'Loyer',              montant:3500, jourPaie:1, actif:true},
+  {id:'paie',   label:'Paie nette',         montant:37050,jourPaie:25,actif:true,auto:true},
+  {id:'urssaf', label:'Charges patronales', montant:19572,jourPaie:26,actif:true,auto:true},
+  {id:'saas',   label:'Abonnements SaaS',   montant:650,  jourPaie:15,actif:true},
+],
+chargesVariables:[
+  {label:'Sous-traitance avril',montantHT:5000,mois:'2025-04',actif:true},
+],
+scoring:[
+  {client:'Techvision SAS', retardMoyen:8, risque:.03},
+  {client:'Groupe Lumière', retardMoyen:5, risque:.02},
+  {client:'Optima Conseil', retardMoyen:22,risque:.12},
+  {client:'Maison Borel',   retardMoyen:3, risque:.01},
+],
+retainers:[
+  {client:'Groupe Lumière',htMensuel:8500,jourEncaissement:5, actif:true},
+  {client:'Techvision SAS',htMensuel:2000,jourEncaissement:10,actif:true},
+  {client:'Maison Borel',  htMensuel:1500,jourEncaissement:22,actif:true},
+],
+pipe:[
+  {client:'NovaCorp',      mission:'Brand identity',   ht:15000,proba:.90,acompte:.30,dateFact:'2025-05-15'},
+  {client:'Groupe Lumière',mission:'Campagne été 2025', ht:22000,proba:.80,acompte:.40,dateFact:'2025-06-01'},
+  {client:'Startup FinTech',mission:'Site corporate',  ht:8500, proba:.60,acompte:.30,dateFact:'2025-06-15'},
+],
+caMensuel:[
+  {mois:'2025-04',label:'Avril 2025', caPrevuHT:35000,inclure:true},
+  {mois:'2025-05',label:'Mai 2025',   caPrevuHT:42000,inclure:true},
+  {mois:'2025-06',label:'Juin 2025',  caPrevuHT:38000,inclure:true},
+],
+evenementsVariables:[
+  {mois:'2025-06',poste:'Directrice Conseil',type:'Prime objectifs',brutHT:3000,statut:'Prévu'},
+],
+};
 
 
 const FLOWO_API = 'https://pjtgfwxpcbvcvzlqsbbk.supabase.co/functions/v1/hyper-action';
@@ -1951,6 +2003,20 @@ function _computeFallback(){
 
 // ── _compute() LOCAL commenté — migré vers Supabase Edge Function ─────────────
 // Moteur local réservé au Stress Test et aux scénarios (non exposé à l'UI)
+
+// ── Scoring helpers ───────────────────────────────────────────────
+function getRetard(client, coef) {
+  const sc = state.scoring.find(s => s.client === client);
+  return sc ? Math.round(sc.retardMoyen * (coef || 1)) : 0;
+}
+function getRisque(client, scenario) {
+  const sc = state.scoring.find(s => s.client === client);
+  if(!sc) return 0;
+  const c = scenario === 'Conservative' ? 2 : (scenario === 'Optimistic' ? 0.5 : 1);
+  return sc.risque * c;
+}
+// ──────────────────────────────────────────────────────────────────
+
 function _computeLocal(){
   const p=state.params,sc=p.scenario,co=p.scenarios[sc],ttcRate=1+p.tauxTVA;
   const isTotal=p.resultatPrev*p.tauxIS,isAcomp=isTotal/4;

@@ -2214,7 +2214,7 @@ const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 const escAttr=v=>esc(v).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
 function fmtD(d){if(!d)return'—';return toDate(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}
-/* removed dead code */
+
 
 
 // ── Tooltip helper ──
@@ -2849,10 +2849,6 @@ function renderChargesPage(r){
   const jvEl=document.getElementById('chvar-jours');
   if(nvEl) nvEl.textContent=nv;
   if(jvEl) jvEl.textContent=jv;
-}
-
-/* removed dead code */);
-  recalculate();
 }
 
 function addChargeRec(){
@@ -4944,7 +4940,7 @@ function cancelSoldeEdit() {
 const PROF_STEPS = [
   {
     id: 'secteur',
-    question: 'Quel est votre secteur d'activité ?',
+    question: "Quel est votre secteur d'activité ?",
     options: [
       { icon:'🎨', label:'Agence / Studio',    sub:'Créatif, digital, conseil, com', value:'agence' },
       { icon:'🔧', label:'Artisan / Prestataire', sub:'BTP, services, maintenance',  value:'artisan' },
@@ -4964,7 +4960,7 @@ const PROF_STEPS = [
   },
   {
     id: 'ca',
-    question: 'Quel est votre chiffre d'affaires mensuel moyen ?',
+    question: "Quel est votre chiffre d'affaires mensuel moyen ?",
     options: [
       { icon:'🌱', label:'Moins de 30 000 €',    sub:'Démarrage ou activité légère', value:'xs' },
       { icon:'📈', label:'30 000 — 150 000 €',   sub:'TPE active',                   value:'sm' },
@@ -5232,7 +5228,7 @@ async function analyzeEcart() {
 
   const groqKey = localStorage.getItem('an_groq_key') || '';
   if(!groqKey) {
-    if(iaResult) iaResult.textContent = 'Clé Groq requise pour l'analyse IA. Configurez-la dans les Paramètres.';
+    if(iaResult) iaResult.textContent = "Clé Groq requise pour l'analyse IA. Configurez-la dans les Paramètres.";
     return;
   }
 
@@ -5248,7 +5244,7 @@ En 3-4 phrases : causes probables de l'écart, impact sur la tréso, et 1-2 acti
     const text = await groqChat([{ role: 'user', content: prompt }], 300, 0.5);
     if(iaResult) iaResult.textContent = text || 'Analyse non disponible.';
   } catch(e) {
-    if(iaResult) iaResult.textContent = 'Erreur lors de l'analyse. Vérifiez votre connexion.';
+    if(iaResult) iaResult.textContent = "Erreur lors de l'analyse. Vérifiez votre connexion.";
   }
 }
 
@@ -5275,8 +5271,7 @@ function checkAndNotify() {
   if(!alertes.length) return;
 
   // Préparer le résumé des alertes
-  const alertesText = alertes.map(a => `• ${a.titre}`).join('
-');
+  const alertesText = alertes.map(a => '• ' + a.titre).join('\n');
   const soldeJ30 = r.kpis.soldeJ30 || 0;
 
   // Envoyer via mailto (client email local) — solution sans backend

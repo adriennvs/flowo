@@ -116,11 +116,11 @@ main > div[id^="p-"]{display:flex;flex-direction:column;gap:var(--space)}
 .btn-sm{font-size:11px;padding:5px 11px}
 
 /* ── KPI strip ── */
-.strip{display:grid;grid-template-columns:repeat(6,1fr);background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
-.ksi{padding:13px 15px;border-right:1px solid var(--bdr)}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;min-width:0}
+.ksi{padding:10px 12px;border-right:1px solid var(--bdr);min-width:0}
 .ksi:last-child{border-right:none}
 .ksi-l{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:600;margin-bottom:5px}
-.ksi-v{font-size:18px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;line-height:1}
+.ksi-v{font-size:16px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;line-height:1;white-space:nowrap}
 .ksi-v.vi{color:var(--vi)} .ksi-v.gr{color:var(--gr)} .ksi-v.am{color:var(--am)}
 .ksi-v.rd{color:var(--rd)} .ksi-v.tl{color:var(--tl)} .ksi-v.dk{color:var(--t1)}
 .ksi-d{font-size:10px;color:var(--t3);margin-top:3px;font-family:var(--mono)}
@@ -220,7 +220,7 @@ main > div[id^="p-"]{display:flex;flex-direction:column;gap:var(--space)}
 .sc-r{font-family:var(--mono);font-size:10px;font-weight:700;width:32px;text-align:right}
 
 /* ── Bar rows (Windsor style) ── */
-.bar-row{display:grid;grid-template-columns:1fr 90px 60px;gap:0;padding:8px 18px;border-bottom:1px solid var(--bdr);align-items:center}
+.bar-row{display:grid;grid-template-columns:1fr 70px auto;gap:6px;padding:8px 18px;border-bottom:1px solid var(--bdr);align-items:center}
 .bar-row:last-child{border-bottom:none}
 
 .bar-label{font-size:11px;font-weight:600}
@@ -2709,7 +2709,7 @@ function render(r){
       <div class="bar-amount" style="color:${bc}">${fmtShort(f.ttc)}</div>
       <div class="bar-badge" style="display:flex;align-items:center;gap:6px">
         <span class="b ${late?'br':'ba'}" style="font-size:8.5px">${esc(f.statut)}</span>
-        ${late?`<button class="btn btn-sm" onclick="openRelance(${JSON.stringify(f).replace(/"/g,'&quot;')})" style="font-size:9px;padding:2px 8px;background:var(--rd);color:#fff;border:none;border-radius:4px;cursor:pointer">📧 Relancer</button>`:''}
+        ${late?`<button class="btn btn-sm" onclick="openRelance(${JSON.stringify(f).replace(/"/g,'&quot;')})" style="font-size:8px;padding:2px 6px;background:var(--rd);color:#fff;border:none;border-radius:4px;cursor:pointer;white-space:nowrap">📧 Relancer</button>`:''}
       </div>
     </div>`;
   }).join(''));

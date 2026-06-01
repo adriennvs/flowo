@@ -2825,15 +2825,18 @@ function render(r){
   if($('action-plan-alr')) H($('action-plan-alr'), actionHtml);
 
   // ── Settings sync ──
-  syncSettings(r);
-  renderEditTables();
-  renderMasseSalariale(r);
-  renderCAPage(r);
-  renderChargesPage(r);
-  renderFcSummary(r);
-  renderFfSummary(r);
-  renderFiscalite(r);
-  } catch(renderErr){ console.error('❌ RENDER ERROR:', renderErr); }
+  try { syncSettings(r); } catch(e) { console.warn('syncSettings error:', e); }
+  try { renderMasseSalariale(r); } catch(e) { console.warn('renderMasse error:', e); }
+  try { renderCAPage(r); } catch(e) { console.warn('renderCA error:', e); }
+  try { renderChargesPage(r); } catch(e) { console.warn('renderCharges error:', e); }
+  try { renderFcSummary(r); } catch(e) { console.warn('renderFcSummary error:', e); }
+  try { renderFfSummary(r); } catch(e) { console.warn('renderFf error:', e); }
+  try { renderFiscalite(r); } catch(e) { console.warn('renderFiscalite error:', e); }
+  } catch(renderErr){ 
+    console.error('❌ RENDER ERROR:', renderErr);
+    // Afficher dans un toast pour debugging
+    if(typeof toast === 'function') toast('⚠ Erreur render: ' + renderErr.message);
+  }
 }
 
 function syncSettings(r){
@@ -6425,12 +6428,18 @@ async function _doLoginAsync(){
     // 3. Appliquer le branding
     _applyTenantBranding(tenant);
 
-    // 4. Charger le state si existant (garder démo si tenant vide)
-    if(tenant.state_json && Object.keys(tenant.state_json).length > 0) {
+    // 4. Charger le state si existant
+    const hasRealData = tenant.state_json && (
+      (tenant.state_json.salaries && tenant.state_json.salaries.length > 0) ||
+      (tenant.state_json.retainers && tenant.state_json.retainers.length > 0) ||
+      (tenant.state_json.facturesClients && tenant.state_json.facturesClients.length > 0)
+    );
+    if(hasRealData) {
       _loadStateFromObject(tenant.state_json);
     } else {
-      // Pas de données sauvegardées → utiliser les données démo déjà dans le state
+      // Pas de données → garder les données démo injectées dans le state initial
       syncSalariesToParams();
+      recalculate();
     }
 
     // 5. Masquer le login et démarrer

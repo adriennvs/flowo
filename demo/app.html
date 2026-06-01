@@ -2005,6 +2005,14 @@ function _computeFallback(){
 // ── _compute() LOCAL commenté — migré vers Supabase Edge Function ─────────────
 // Moteur local réservé au Stress Test et aux scénarios (non exposé à l'UI)
 
+function fmtInput(n, mode='int'){
+  if(n===null||n===undefined||n==='') return '';
+  const num = Number(String(n).replace(/\s+/g,'').replace(/,/g,'.'));
+  if(!Number.isFinite(num)) return '';
+  if(mode==='percent') return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:1}).format(num);
+  if(mode==='float') return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:2}).format(num);
+  return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(num);
+}
 // ── Scoring helpers ───────────────────────────────────────────────
 function getRetard(client, coef) {
   const sc = state.scoring.find(s => s.client === client);
@@ -2543,6 +2551,8 @@ const setVal=(id,v)=>{const el=document.getElementById(id);if(el&&el!==document.
 
 function render(r){
   try {
+  // Debug : vérifier que r est valide
+  if(!r || !r.kpis) { console.error('render: r invalide', r); return; }
   const k=r.kpis,p=state.params;
 
   // Header / sidebar
@@ -2825,17 +2835,19 @@ function render(r){
   if($('action-plan-alr')) H($('action-plan-alr'), actionHtml);
 
   // ── Settings sync ──
-  try { syncSettings(r); } catch(e) { console.warn('syncSettings error:', e); }
-  try { renderMasseSalariale(r); } catch(e) { console.warn('renderMasse error:', e); }
-  try { renderCAPage(r); } catch(e) { console.warn('renderCA error:', e); }
-  try { renderChargesPage(r); } catch(e) { console.warn('renderCharges error:', e); }
-  try { renderFcSummary(r); } catch(e) { console.warn('renderFcSummary error:', e); }
-  try { renderFfSummary(r); } catch(e) { console.warn('renderFf error:', e); }
-  try { renderFiscalite(r); } catch(e) { console.warn('renderFiscalite error:', e); }
   } catch(renderErr){ 
     console.error('❌ RENDER ERROR:', renderErr);
-    // Afficher dans un toast pour debugging
-    if(typeof toast === 'function') toast('⚠ Erreur render: ' + renderErr.message);
+    if(typeof toast === 'function') toast('⚠ Erreur: ' + renderErr.message);
+  }
+  // Rendu des pages de saisie — hors try/catch, toujours exécuté
+  if(r) {
+    try { syncSettings(r); } catch(e) { console.warn('syncSettings:', e.message); }
+    try { renderMasseSalariale(r); } catch(e) { console.warn('Masse:', e.message); }
+    try { renderCAPage(r); } catch(e) { console.warn('CA:', e.message); }
+    try { renderChargesPage(r); } catch(e) { console.warn('Charges:', e.message); }
+    try { renderFcSummary(r); } catch(e) { console.warn('FcSummary:', e.message); }
+    try { renderFfSummary(r); } catch(e) { console.warn('FfSummary:', e.message); }
+    try { renderFiscalite(r); } catch(e) { console.warn('Fiscalite:', e.message); }
   }
 }
 
